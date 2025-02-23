@@ -8,8 +8,6 @@ await dbConnect();
 export async function POST(request: Request) {
     try {
         const { customerName, items: orderItems, total } = await request.json();
-
-
         const session = await mongoose.startSession();
         session.startTransaction();
 
