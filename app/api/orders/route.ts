@@ -3,12 +3,12 @@ import dbConnect from '@/lib/dbConnect';
 import { InventoryElement } from '@/models/InventoryElement';
 import Order from '@/models/Order';
 import mongoose from 'mongoose';
-
+await dbConnect();
 
 export async function POST(request: Request) {
     try {
         const { customerName, items: orderItems, total } = await request.json();
-        await dbConnect();
+
 
         const session = await mongoose.startSession();
         session.startTransaction();
@@ -78,7 +78,6 @@ export async function POST(request: Request) {
 
 export async function GET() {
     try {
-        await dbConnect();
         const orders = await Order.find({}).sort({ date: -1 });
 
         const formattedOrders = orders.map(order => ({

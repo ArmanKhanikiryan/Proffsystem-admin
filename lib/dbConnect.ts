@@ -9,10 +9,8 @@ if (!MONGODB_URI) {
 }
 
 async function dbConnect() {
-    await mongoose.connect(MONGODB_URI);
+    if (mongoose.connection.readyState >= 1) return;
+    return mongoose.connect(MONGODB_URI);
 }
-export default dbConnect;
 
-dbConnect()
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.log(err));
+export default dbConnect;

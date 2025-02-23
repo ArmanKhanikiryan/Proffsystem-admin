@@ -3,8 +3,8 @@ import jwt from 'jsonwebtoken';
 import { User } from "@/models/User";
 import dbConnect from "@/lib/dbConnect";
 
+await dbConnect();
 export async function POST(request: Request) {
-    await dbConnect();
     const { username, password } = await request.json();
     const user = await User.findOne({ username, password });
     if (!user) {
