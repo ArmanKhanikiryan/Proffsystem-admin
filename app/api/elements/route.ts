@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import {IInventoryElement, InventoryElement} from "@/models/InventoryElement";
 import dbConnect from "@/lib/dbConnect";
 
+await dbConnect();
+
 export async function GET() {
     try {
-        await dbConnect();
         const elements: IInventoryElement[] = await InventoryElement.find({});
         return NextResponse.json({ elements });
     } catch (error) {
@@ -15,7 +16,6 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
-        await dbConnect();
         const newElement = await request.json();
 
         let query = {};
