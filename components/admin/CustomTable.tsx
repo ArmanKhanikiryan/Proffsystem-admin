@@ -1,15 +1,17 @@
 'use client';
-import {ChangeEvent, useState} from 'react';
+import { ChangeEvent, useState } from 'react';
 import { DataTable } from 'primereact/datatable';
-import {Column, ColumnFilterElementTemplateOptions} from 'primereact/column';
+import { Column, ColumnFilterElementTemplateOptions } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
 import { MultiSelect } from 'primereact/multiselect';
 import { FilterMatchMode } from 'primereact/api';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { colorOptions, typeOptions } from '@/lib/constants';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
-import {fetchElements} from "@/lib/api";
+import { fetchElements, deleteElement } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import {DeletePayload} from "@/lib/types";
 
 type Element = {
     id?: number;
@@ -20,11 +22,25 @@ type Element = {
 };
 
 export default function AdminTable() {
+    const queryClient = useQueryClient();
+
     const { data, isLoading } = useQuery({
         queryKey: ['elements'],
         queryFn: fetchElements,
         staleTime: 1000 * 60 * 5,
     });
+
+    const deleteMutation = useMutation({
+        mutationFn: (payload: DeletePayload) => deleteElement(payload),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['elements'] });
+        },
+        onError: (error) => {
+            console.error('Error deleting element:', error);
+            alert('Failed to delete element. Please try again.');
+        },
+    });
+
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         color: { value: null, matchMode: FilterMatchMode.IN },
@@ -38,19 +54,16 @@ export default function AdminTable() {
     const onGlobalFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         const _filters = { ...filters };
-        // @ts-expect-error - color filter is always defined
+        //@ts-expect-error - global filter is always defined
         _filters['global'].value = value;
         setFilters(_filters);
         setGlobalFilterValue(value);
     };
 
     const totalPrice =
-        data?.elements?.reduce(
-            (acc: number, el: Element) => {
-                return acc + el.price
-            },
-            0
-        ) || 0;
+        data?.elements?.reduce((acc: number, el: Element) => {
+            return acc + el.price;
+        }, 0) || 0;
 
     const renderHeader = () => {
         return (
@@ -69,7 +82,7 @@ export default function AdminTable() {
         return (
             <MultiSelect
                 value={options.value}
-                options={colorOptions}
+                options={colorOptions.map((color) => ({ label: color, value: color }))} // Ensure options have label/value
                 onChange={(e) => options.filterCallback(e.value)}
                 placeholder="Select Colors"
                 className="p-column-filter"
@@ -96,7 +109,7 @@ export default function AdminTable() {
         return (
             <InputText
                 type="number"
-                value={options.value}
+                value={options.value || ''} // Use empty string instead of null
                 onChange={(e) => options.filterCallback(e.target.value)}
                 placeholder="Search by Price"
                 className="p-column-filter"
@@ -108,11 +121,27 @@ export default function AdminTable() {
         return (
             <InputText
                 type="number"
-                value={options.value}
+                value={options.value || ''} // Use empty string instead of null
                 onChange={(e) => options.filterCallback(e.target.value)}
                 placeholder="Search by Quantity"
                 className="p-column-filter"
             />
+        );
+    };
+
+    const deleteBodyTemplate = (rowData: Element) => {
+        return (
+            <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => {
+                    const payload = { type: rowData.type, color: rowData.color ? rowData.color : null };
+                    deleteMutation.mutate(payload);
+                }}
+                disabled={deleteMutation.isPending}
+            >
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            </Button>
         );
     };
 
@@ -141,7 +170,6 @@ export default function AdminTable() {
                         filter
                         filterElement={typeFilterTemplate}
                     />
-
                     <Column
                         field="color"
                         header="Գույն"
@@ -162,6 +190,11 @@ export default function AdminTable() {
                         sortable
                         filter
                         filterElement={quantityFilterTemplate}
+                    />
+                    <Column
+                        header="Actions"
+                        body={deleteBodyTemplate}
+                        style={{ width: '100px' }}
                     />
                 </DataTable>
             )}

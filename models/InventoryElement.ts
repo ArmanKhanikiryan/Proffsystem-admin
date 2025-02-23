@@ -8,7 +8,7 @@ export interface IInventoryElement extends Document {
 }
 
 const InventoryElementSchema: Schema = new Schema({
-    color: { type: String, required: true },
+    color: { type: String, required: false},
     type: { type: String, required: true },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true },

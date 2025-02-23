@@ -22,6 +22,7 @@ import { addElement } from '@/lib/api';
 import { colorOptions, typeOptions } from "@/lib/constants";
 import AdminTable from "@/components/admin/CustomTable";
 import CalculateItem from "@/components/admin/CalculateItem";
+import OrdersTable from "@/components/admin/OrdersTable";
 
 type AdminPanelProps = {
     dehydratedState: unknown;
@@ -46,6 +47,8 @@ function AdminPanelContent() {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['elements'] }),
     });
 
+
+
     const [formData, setFormData] = useState<Omit<Element, 'price'>>({
         color: '',
         type: '',
@@ -56,7 +59,7 @@ function AdminPanelContent() {
         e.preventDefault();
         const selectedItem = typeOptions.find((elem) => elem.type === formData.type)
         //@ts-expect-error - selectedItem is always defined
-        const price = selectedItem.priceOptions[formData.color]
+        const price = selectedItem.priceOptions[formData.color ? formData.color : 'default'];
         mutation.mutate({...formData, price: price * formData.quantity});
         setFormData({ color: '', type: '', quantity: 0 });
     };
@@ -65,7 +68,7 @@ function AdminPanelContent() {
         if(formData.type.includes('Երկաթ')) {
             setFormData({...formData, color: ''})
         }
-    }, [formData])
+    }, [formData.type])
 
     const disabledCondition = useCallback(() => {
         if(formData.type.includes('Երկաթ')) {
@@ -143,6 +146,11 @@ function AdminPanelContent() {
             <Card className="p-4">
                 <h1 className="text-2xl font-bold mb-4">Արժեքի Հաշվիչ</h1>
                 <CalculateItem />
+            </Card>
+
+            <Card className="p-4">
+                <h1 className="text-2xl font-bold mb-4">Պատվերների Պատմություն</h1>
+                <OrdersTable />
             </Card>
         </div>
     );
