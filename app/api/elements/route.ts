@@ -8,6 +8,7 @@ export async function GET() {
         const elements: IInventoryElement[] = await InventoryElement.find({});
         return NextResponse.json({ elements });
     } catch (error) {
+        console.error(error)
         return NextResponse.json({ success: false, error: 'Failed to load elements' }, { status: 500 });
     }
 }
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
             });
         }
     } catch (error) {
-        console.log(error, 123123123123)
+        console.error(error)
         return NextResponse.json({ success: false, error: 'Failed to process request' }, { status: 500 });
     }
 }

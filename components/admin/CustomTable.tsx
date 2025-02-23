@@ -1,7 +1,7 @@
 'use client';
 import {ChangeEvent, useState} from 'react';
 import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
+import {Column, ColumnFilterElementTemplateOptions} from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
 import { MultiSelect } from 'primereact/multiselect';
 import { FilterMatchMode } from 'primereact/api';
@@ -37,8 +37,8 @@ export default function AdminTable() {
 
     const onGlobalFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        let _filters = { ...filters };
-        // @ts-ignore
+        const _filters = { ...filters };
+        // @ts-expect-error - color filter is always defined
         _filters['global'].value = value;
         setFilters(_filters);
         setGlobalFilterValue(value);
@@ -65,7 +65,7 @@ export default function AdminTable() {
         );
     };
 
-    const colorFilterTemplate = (options: any) => {
+    const colorFilterTemplate = (options: ColumnFilterElementTemplateOptions) => {
         return (
             <MultiSelect
                 value={options.value}
@@ -77,7 +77,7 @@ export default function AdminTable() {
         );
     };
 
-    const typeFilterTemplate = (options: any) => {
+    const typeFilterTemplate = (options: ColumnFilterElementTemplateOptions) => {
         return (
             <MultiSelect
                 value={options.value}
@@ -92,7 +92,7 @@ export default function AdminTable() {
         );
     };
 
-    const priceFilterTemplate = (options: any) => {
+    const priceFilterTemplate = (options: ColumnFilterElementTemplateOptions) => {
         return (
             <InputText
                 type="number"
@@ -104,7 +104,7 @@ export default function AdminTable() {
         );
     };
 
-    const quantityFilterTemplate = (options: any) => {
+    const quantityFilterTemplate = (options: ColumnFilterElementTemplateOptions) => {
         return (
             <InputText
                 type="number"

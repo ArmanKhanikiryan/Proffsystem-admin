@@ -54,7 +54,8 @@ function AdminPanelContent() {
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const selectedItem:any = typeOptions.find((elem) => elem.type === formData.type)
+        const selectedItem = typeOptions.find((elem) => elem.type === formData.type)
+        //@ts-expect-error - selectedItem is always defined
         const price = selectedItem.priceOptions[formData.color]
         mutation.mutate({...formData, price: price * formData.quantity});
         setFormData({ color: '', type: '', quantity: 0 });
@@ -64,7 +65,7 @@ function AdminPanelContent() {
         if(formData.type.includes('Երկաթ')) {
             setFormData({...formData, color: ''})
         }
-    }, [formData.type])
+    }, [formData])
 
     const disabledCondition = useCallback(() => {
         if(formData.type.includes('Երկաթ')) {

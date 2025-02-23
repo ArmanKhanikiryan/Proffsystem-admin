@@ -52,7 +52,7 @@ export default function CalculateItem() {
 
         const price = item.type.includes('Երկաթ')
             ? typeConfig.priceOptions.default
-            // @ts-ignore
+            // @ts-expect-error - color is always defined
             : typeConfig.priceOptions[item.color] || 0;
 
         return price * item.quantity;
